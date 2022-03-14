@@ -1,0 +1,5 @@
+/tasks.db
+/.isort.cfg
+/pyproject.toml
+/tests/test.py
+/tests/tasks.db
