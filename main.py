@@ -74,11 +74,11 @@ async def create_new_task(pushed_json: CreateNewTask):
     return NewTaskResponse(new_task_id=create_task)
 
 
-class ReadListsById(BaseModel):
-    userid: int
-
-    class Config:
-        schema_extra = {"example": {"userid": 1}}
+# class ReadListsById(BaseModel):
+#     userid: int
+#
+#     class Config:
+#         schema_extra = {"example": {"userid": 1}}
 
 
 class ReadListsIdResponse(BaseModel):
@@ -90,17 +90,17 @@ class ReadListsIdResponse(BaseModel):
         schema_extra = {"example": [{"list_id": 1, "list_name": "My list", "user_id": 1}]}
 
 
-@app.get("/read-lists-by-id", response_model=List[ReadListsIdResponse])
-async def read_lists_by_id(pushed_json: ReadListsById):
-    readed_lists = dao.DAO().read_lists_by_userid(pushed_json.userid)
+@app.get("/read-lists-by-id/{user_id}", response_model=List[ReadListsIdResponse])
+async def read_lists_by_id(user_id: int):
+    readed_lists = dao.DAO().read_lists_by_userid(user_id)
     return readed_lists
 
 
-class ReadTasksByListId(BaseModel):
-    list_id: int
-
-    class Config:
-        schema_extra = {"example": {"list_id": 1}}
+# class ReadTasksByListId(BaseModel):
+#     list_id: int
+#
+#     class Config:
+#         schema_extra = {"example": {"list_id": 1}}
 
 
 class ReadTasksByListIdResponse(BaseModel):
@@ -126,9 +126,9 @@ class ReadTasksByListIdResponse(BaseModel):
         }
 
 
-@app.get("/read-tasks-by-list-id", response_model=List[ReadTasksByListIdResponse])
-async def read_lists_by_id(pushed_json: ReadTasksByListId):
-    readed_tasks = dao.DAO().read_tasks_by_list_id(pushed_json.list_id)
+@app.get("/read-tasks-by-list-id/{list_id}", response_model=List[ReadTasksByListIdResponse])
+async def read_lists_by_id(list_id: int):
+    readed_tasks = dao.DAO().read_tasks_by_list_id(list_id)
 
     return readed_tasks
 
