@@ -87,7 +87,7 @@ class ReadListsIdResponse(BaseModel):
     user_id: int
 
     class Config:
-        schema_extra = {"example": {"list_id": 1, "list_name": "My list", "user_id": 1}}
+        schema_extra = {"example": [{"list_id": 1, "list_name": "My list", "user_id": 1}]}
 
 
 @app.get("/read-lists-by-id", response_model=List[ReadListsIdResponse])
@@ -114,7 +114,7 @@ class ReadTasksByListIdResponse(BaseModel):
 
     class Config:
         schema_extra = {
-            "example": {
+            "example": [{
                 "task_id": 1,
                 "list_id": 1,
                 "data": "Some text",
@@ -122,7 +122,7 @@ class ReadTasksByListIdResponse(BaseModel):
                 "status": 1,
                 "created_datetime": "2022-03-14 18:00:00",
                 "edite_datetime": "2022-03-14 19:00:00",
-            }
+            }]
         }
 
 
