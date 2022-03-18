@@ -38,14 +38,25 @@ class DAO:
     def read_lists_by_userid(self, userid: int):
         conn = engine.connect()
         query = select(
-            [
-                user_lists.c.list_id,
-                user_lists.c.list_name,
-            ]
+            [user_lists]
         ).where(user_lists.c.user_id == userid)
 
-        result = conn.execute(query).first()
-        return dict(result)
+        list_all_list = []
+        result = conn.execute(query)
+
+        for row in result:
+            list_all_list.append(row)
+
+        all_dictonarys = []
+        one_list_keys = [
+            "list_id",
+            "list_name",
+            "user_id"
+        ]
+        for row in list_all_list:
+            one_unit_dict = dict(zip(one_list_keys, row))
+            all_dictonarys.append(one_unit_dict)
+        return all_dictonarys
 
     def read_tasks_by_list_id(self, list_id: int):
         conn = engine.connect()

@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -10,6 +10,7 @@ from modules.storage import dao
 # from modules.pinger import pinger_all_network_with_threading
 # from modules.security import security
 from pydantic import BaseModel, Field
+import json
 
 app = FastAPI()
 
@@ -83,16 +84,16 @@ class ReadListsById(BaseModel):
 class ReadListsIdResponse(BaseModel):
     list_id: int
     list_name: str
+    user_id: int
 
     class Config:
-        schema_extra = {"example": {"list_id": 1, "list_name": "My list"}}
+        schema_extra = {"example": {"list_id": 1, "list_name": "My list", "user_id": 1}}
 
 
-@app.get("/read-lists-by-id", response_model=ReadListsIdResponse)
+@app.get("/read-lists-by-id", response_model=List[ReadListsIdResponse])
 async def read_lists_by_id(pushed_json: ReadListsById):
     readed_lists = dao.DAO().read_lists_by_userid(pushed_json.userid)
-
-    return {readed_lists}
+    return readed_lists
 
 
 class ReadTasksByListId(BaseModel):
@@ -125,7 +126,7 @@ class ReadTasksByListIdResponse(BaseModel):
         }
 
 
-@app.get("/read-tasks-by-list-id", response_model=ReadTasksByListIdResponse)
+@app.get("/read-tasks-by-list-id", response_model=List[ReadTasksByListIdResponse])
 async def read_lists_by_id(pushed_json: ReadTasksByListId):
     readed_tasks = dao.DAO().read_tasks_by_list_id(pushed_json.list_id)
 
