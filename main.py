@@ -4,11 +4,11 @@ import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-# from fastapi_jwt_auth import AuthJWT
-# from fastapi_jwt_auth.exceptions import AuthJWTException
+from fastapi_jwt_auth import AuthJWT
+from fastapi_jwt_auth.exceptions import AuthJWTException
 from modules.storage import dao
 # from modules.pinger import pinger_all_network_with_threading
-# from modules.security import security
+from modules.security import security
 from pydantic import BaseModel, Field
 import json
 
@@ -41,8 +41,10 @@ class NewListResponse(BaseModel):
         schema_extra = {"example": {"new_list_id": 1}}
 
 
-@app.post("/create-new-list", response_model=NewListResponse)
-async def create_new_list(pushed_json: CreateNewList):
+@app.post("/create-new-list", response_model=NewListResponse, description="Access bearer token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY0Nzg1OTMyNywibmJmIjoxNjQ3ODU5MzI3LCJqdGkiOiJmZjY1Y2U2ZS0xMWZhLTQxYzktOGNkMS1hMWE4YzM2YjgwNGMiLCJleHAiOjE2NDc4NjAyMjcsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2V9.RbjM47WNf-TUY3tUmfD0wF4OBeqW85UsgSL9z2DWuig")
+async def create_new_list(pushed_json: CreateNewList, Authorize: AuthJWT = Depends()):
+    Authorize.jwt_required()
+
     create_list = dao.DAO().create_list(pushed_json.list_name, pushed_json.user_id)
 
     return NewListResponse(new_list_id=create_list)
@@ -131,6 +133,53 @@ async def read_lists_by_id(list_id: int):
     readed_tasks = dao.DAO().read_tasks_by_list_id(list_id)
 
     return readed_tasks
+
+
+# Auth block
+
+class Settings(BaseModel):
+    authjwt_secret_key: str = "secret"
+
+
+@AuthJWT.load_config
+def get_config():
+    return Settings()
+
+class User(BaseModel):
+    login: str
+    password: str
+
+class ReturnLoginUser(BaseModel):
+    access_token: str
+
+    class Config:
+        schema_extra = {"access_token": "blabla123bla456"}
+
+
+@app.get("/login-user", response_model=ReturnLoginUser)
+async def login_user(data: User, Authorize: AuthJWT = Depends()) -> dict:
+    new_class = security.CustomSecurity()
+    response_check_pass_in_db = new_class.check_user(data.login, data.password)
+    if response_check_pass_in_db["status_pass"] == "BAD":
+        raise HTTPException(status_code=401, detail="Bad username or password")
+
+    access_token = Authorize.create_access_token(subject=data.login)
+    return {"access_token": access_token}
+
+
+# admin/admin/  "new_user_id": 1
+@app.get("/create-user")
+async def create_user(data: User):
+    new_class = security.CustomSecurity()
+    new_user_id = new_class.registration_new_user(data.login, data.password)
+    return {"new_user_id": new_user_id}
+
+
+# exception handler for authjwt
+@app.exception_handler(AuthJWTException)
+def authjwt_exception_handler(request: Request, exc: AuthJWTException):
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+
 
 
 if __name__ == "__main__":
