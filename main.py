@@ -156,7 +156,7 @@ class ReturnLoginUser(BaseModel):
         schema_extra = {"access_token": "blabla123bla456"}
 
 
-@app.get("/login-user", response_model=ReturnLoginUser)
+@app.post("/login-user", response_model=ReturnLoginUser)
 async def login_user(data: User, Authorize: AuthJWT = Depends()) -> dict:
     new_class = security.CustomSecurity()
     response_check_pass_in_db = new_class.check_user(data.login, data.password)
@@ -168,7 +168,7 @@ async def login_user(data: User, Authorize: AuthJWT = Depends()) -> dict:
 
 
 # admin/admin/  "new_user_id": 1
-@app.get("/create-user")
+@app.post("/create-user")
 async def create_user(data: User):
     new_class = security.CustomSecurity()
     new_user_id = new_class.registration_new_user(data.login, data.password)
