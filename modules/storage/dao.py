@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import select, update
+from sqlalchemy import select, update, delete
 
 from modules.storage.task_storage import engine, user_lists, user_tasks
 
@@ -17,6 +17,13 @@ class DAO:
             new_list_id = result.inserted_primary_key[0]
 
         return new_list_id
+
+    def delete_list_by_list_id(self, list_id: int):
+        conn = engine.connect()
+        with conn.begin():
+            stmt = (delete(user_lists).where(user_lists.c.list_id == list_id))
+            result = conn.execute(stmt)
+        return result
 
     def create_task(self, list_id: int, data: str, priority: int, status: int) -> int:
         created_datetime = datetime.datetime.now().replace(microsecond=0)
@@ -83,3 +90,4 @@ class DAO:
             all_dictonarys.append(one_unit_dict)
 
         return all_dictonarys
+

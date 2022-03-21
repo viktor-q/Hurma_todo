@@ -50,6 +50,18 @@ async def create_new_list(pushed_json: CreateNewList, Authorize: AuthJWT = Depen
     return NewListResponse(new_list_id=create_list)
 
 
+class DeleteListByListId(BaseModel):
+    list_id: int
+
+    class Config:
+        schema_extra = {"example": {"list_id": 1}}
+
+@app.post("/delete-list-by-list-id")
+async def delete_list_by_list_id(pushed_json: DeleteListByListId):
+    deleted_list = dao.DAO().delete_list_by_list_id(pushed_json.list_id)
+    return f'done'
+
+
 class CreateNewTask(BaseModel):
     list_id: int
     data: str
